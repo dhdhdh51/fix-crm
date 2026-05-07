@@ -1058,7 +1058,17 @@ textarea.form-control { resize: vertical; min-height: 100px; }
     .header-inner { padding: 0 20px; }
     .hamburger { display: flex; }
     .main-nav, .header-cta { display: none; }
-    .main-nav.open { display: flex; flex-direction: column; position: fixed; top: 80px; left: 0; right: 0; background: var(--beige); padding: 16px; box-shadow: var(--shadow-md); gap: 4px; z-index: 999; max-height: calc(100vh - 80px); overflow-y: auto; }
+    .main-nav.open {
+        display: flex; flex-direction: column; align-items: stretch;
+        position: fixed; top: 80px; left: 0; right: 0; bottom: 0;
+        background: var(--beige); padding: 12px 0; box-shadow: var(--shadow-md);
+        gap: 0; z-index: 999; height: calc(100vh - 80px); overflow-y: auto;
+    }
+    .main-nav.open a {
+        display: block; width: 100%; padding: 16px 24px;
+        font-size: 1rem; font-weight: 600; text-align: left;
+        border-radius: 0; border-bottom: 1px solid rgba(128,0,0,0.08);
+    }
     .properties-grid { grid-template-columns: 1fr; }
     .blog-grid { grid-template-columns: 1fr; }
     .team-grid { grid-template-columns: repeat(2, 1fr); }
