@@ -109,7 +109,7 @@ require_once __DIR__ . '/layout-header.php';
     <div class="alert alert-success alert-dismissible fade show"><i class="fas fa-check-circle me-2"></i><?= $success ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
   <?php endif; ?>
   <?php if ($errors): ?>
-    <div class="alert alert-danger alert-dismissible fade show"><?= implode('<br>', $errors) ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    <div class="alert alert-danger alert-dismissible fade show"><i class="fas fa-exclamation-circle me-2"></i><?= implode('<br>', array_map('htmlspecialchars', $errors)) ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
   <?php endif; ?>
 
   <!-- Form Panel -->

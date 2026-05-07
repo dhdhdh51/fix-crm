@@ -106,7 +106,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($message) $body .= "\nMessage:\n$message\n";
                 $body    .= "\nResume   : " . SITE_URL . '/' . $resumePath;
                 $body    .= "\n\nView all applications: " . ADMIN_URL . '/job-applications.php';
-                @mail($notifyEmail, $subject, $body, "From: $email\r\nReply-To: $email");
+                $safeEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : $notifyEmail;
+                @mail($notifyEmail, $subject, $body, "From: $safeEmail\r\nReply-To: $safeEmail");
             }
             $success = 'Your application has been submitted! We will contact you within 3 business days.';
         }

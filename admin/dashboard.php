@@ -11,7 +11,9 @@ $db          = db();
 $chartData = [];
 for ($i = 6; $i >= 0; $i--) {
     $date  = date('Y-m-d', strtotime("-$i days"));
-    $count = (int)$db->query("SELECT COUNT(*) FROM leads WHERE DATE(created_at)='$date'")->fetchColumn();
+    $stmt  = $db->prepare("SELECT COUNT(*) FROM leads WHERE DATE(created_at) = ?");
+    $stmt->execute([$date]);
+    $count = (int)$stmt->fetchColumn();
     $chartData[] = ['date' => date('d M', strtotime($date)), 'count' => $count];
 }
 
@@ -45,8 +47,8 @@ $topProps = $db->query("SELECT title, views, type, city FROM properties WHERE st
     <div class="stat-card">
         <div class="stat-card-icon blue"><i class="fas fa-eye"></i></div>
         <div>
-            <div class="stat-card-value"><?= number_format($stats['total_views'] ?? 0) ?></div>
-            <div class="stat-card-label">Total Page Views</div>
+            <div class="stat-card-value"><?= number_format($stats['total_enquiries'] ?? 0) ?></div>
+            <div class="stat-card-label">Enquiries Today</div>
         </div>
     </div>
     <div class="stat-card">
