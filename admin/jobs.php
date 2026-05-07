@@ -12,18 +12,18 @@ $db = db();
 
 // Auto-create table if it doesn't exist yet
 $db->exec("CREATE TABLE IF NOT EXISTS `job_postings` (
-    `id`          int(11)      NOT NULL AUTO_INCREMENT,
-    `title`       varchar(200) NOT NULL,
-    `department`  varchar(100) DEFAULT NULL,
-    `location`    varchar(150) DEFAULT NULL,
-    `experience`  varchar(100) DEFAULT NULL,
-    `description` text         DEFAULT NULL,
-    `requirements` text        DEFAULT NULL,
-    `status`      enum('active','inactive') DEFAULT 'active',
-    `featured`    tinyint(1)   DEFAULT 0,
-    `sort_order`  int(11)      DEFAULT 0,
-    `created_at`  timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at`  timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `id`           int(11)      NOT NULL AUTO_INCREMENT,
+    `title`        varchar(200) NOT NULL,
+    `department`   varchar(100) DEFAULT NULL,
+    `location`     varchar(150) DEFAULT NULL,
+    `experience`   varchar(100) DEFAULT NULL,
+    `description`  longtext     DEFAULT NULL,
+    `requirements` longtext     DEFAULT NULL,
+    `status`       enum('active','inactive') DEFAULT 'active',
+    `featured`     tinyint(1)   DEFAULT 0,
+    `sort_order`   int(11)      DEFAULT 0,
+    `created_at`   timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`   timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
@@ -47,8 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $department   = trim($_POST['department'] ?? '');
         $location     = trim($_POST['location'] ?? '');
         $experience   = trim($_POST['experience'] ?? '');
-        $description  = trim($_POST['description'] ?? '');
-        $requirements = trim($_POST['requirements'] ?? '');
+        // Quill sends HTML via hidden inputs
+        $description  = $_POST['description_html'] ?? trim($_POST['description'] ?? '');
+        $requirements = $_POST['requirements_html'] ?? trim($_POST['requirements'] ?? '');
         $status       = trim($_POST['status'] ?? 'active');
         $featured     = isset($_POST['featured']) ? 1 : 0;
         $sort_order   = (int)($_POST['sort_order'] ?? 0);
@@ -58,6 +59,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['flash'] = ['type' => 'danger', 'msg' => 'Job title is required.'];
             header('Location: ' . ADMIN_URL . '/jobs.php'); exit;
         }
+
+        // Basic HTML sanitization — strip dangerous tags, keep formatting
+        $allowed = '<p><br><b><strong><i><em><u><ul><ol><li><h1><h2><h3><h4><h5><h6><blockquote><a><span>';
+        $description  = strip_tags($description,  $allowed);
+        $requirements = strip_tags($requirements, $allowed);
 
         try {
             if ($editId) {
@@ -96,6 +102,9 @@ $activePage = 'jobs';
 require_once __DIR__ . '/layout-header.php';
 ?>
 
+<!-- Quill editor CSS -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+
 <div class="page-header">
     <div>
         <h1><i class="fas fa-briefcase" style="color:var(--maroon)"></i> Job Postings</h1>
@@ -121,14 +130,17 @@ require_once __DIR__ . '/layout-header.php';
             <button type="button" onclick="toggleForm(false)" class="btn btn-sm btn-gray"><i class="fas fa-times"></i></button>
         </div>
         <div class="card-body">
-            <form method="POST">
+            <form method="POST" id="jobForm">
                 <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
                 <input type="hidden" name="action" value="<?= $editJob ? 'update_job' : 'add_job' ?>">
                 <?php if ($editJob): ?>
                 <input type="hidden" name="edit_id" value="<?= $editJob['id'] ?>">
                 <?php endif; ?>
+                <!-- Quill output hidden fields -->
+                <input type="hidden" name="description_html" id="descriptionHtml">
+                <input type="hidden" name="requirements_html" id="requirementsHtml">
 
-                <div class="form-grid" style="margin-bottom:14px">
+                <div class="form-grid" style="margin-bottom:18px">
                     <div class="form-group form-full">
                         <label class="form-label">Job Title *</label>
                         <input type="text" name="title" value="<?= htmlspecialchars($editJob['title'] ?? '') ?>"
@@ -166,27 +178,29 @@ require_once __DIR__ . '/layout-header.php';
                                class="form-control" min="0" placeholder="0 = first">
                         <span class="form-hint">Lower number appears first</span>
                     </div>
-                    <div class="form-group form-full">
-                        <label class="form-label">Job Description</label>
-                        <textarea name="description" rows="4" class="form-control"
-                            placeholder="Describe the role, responsibilities, and what the candidate will do..."><?= htmlspecialchars($editJob['description'] ?? '') ?></textarea>
-                    </div>
-                    <div class="form-group form-full">
-                        <label class="form-label">Requirements / Skills</label>
-                        <textarea name="requirements" rows="4" class="form-control"
-                            placeholder="List required skills, qualifications, and experience..."><?= htmlspecialchars($editJob['requirements'] ?? '') ?></textarea>
-                    </div>
+                </div>
+
+                <!-- Rich text: Description -->
+                <div class="form-group" style="margin-bottom:20px">
+                    <label class="form-label">Job Description</label>
+                    <div id="descriptionEditor" style="min-height:180px;background:#fff;border-radius:0 0 8px 8px"><?= $editJob['description'] ?? '' ?></div>
+                </div>
+
+                <!-- Rich text: Requirements -->
+                <div class="form-group" style="margin-bottom:20px">
+                    <label class="form-label">Requirements / Skills</label>
+                    <div id="requirementsEditor" style="min-height:140px;background:#fff;border-radius:0 0 8px 8px"><?= $editJob['requirements'] ?? '' ?></div>
                 </div>
 
                 <div class="form-check" style="margin-bottom:18px">
                     <input type="checkbox" name="featured" id="featuredCb" <?= !empty($editJob['featured']) ? 'checked' : '' ?>>
                     <label for="featuredCb" class="form-check-label">
-                        <i class="fas fa-star" style="color:var(--gold)"></i> Mark as Featured / Urgent Hiring
+                        <i class="fas fa-fire" style="color:var(--danger)"></i> Mark as Urgent Hiring
                     </label>
                 </div>
 
                 <div style="display:flex;gap:10px">
-                    <button type="submit" class="btn btn-gold">
+                    <button type="submit" class="btn btn-gold" id="saveJobBtn">
                         <i class="fas fa-save"></i> <?= $editJob ? 'Update Job' : 'Post Job' ?>
                     </button>
                     <button type="button" onclick="toggleForm(false)" class="btn btn-gray">Cancel</button>
@@ -209,14 +223,8 @@ require_once __DIR__ . '/layout-header.php';
         <table>
             <thead>
                 <tr>
-                    <th>Job Title</th>
-                    <th>Department</th>
-                    <th>Location</th>
-                    <th>Experience</th>
-                    <th>Status</th>
-                    <th>Featured</th>
-                    <th>Posted</th>
-                    <th>Actions</th>
+                    <th>Job Title</th><th>Department</th><th>Location</th>
+                    <th>Experience</th><th>Status</th><th>Urgent</th><th>Posted</th><th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -225,39 +233,31 @@ require_once __DIR__ . '/layout-header.php';
                 <td>
                     <div style="font-weight:600;font-size:13.5px"><?= htmlspecialchars($j['title']) ?></div>
                     <?php if ($j['description']): ?>
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px"><?= htmlspecialchars(mb_substr($j['description'], 0, 70)) ?>...</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px"><?= mb_substr(strip_tags($j['description']), 0, 70) ?>...</div>
                     <?php endif; ?>
                 </td>
                 <td>
                     <?php if ($j['department']): ?>
                     <span class="badge badge-maroon"><?= htmlspecialchars($j['department']) ?></span>
-                    <?php else: ?><span style="color:var(--text-muted)">—</span><?php endif; ?>
+                    <?php else: ?>—<?php endif; ?>
                 </td>
                 <td style="font-size:12px">
                     <?php if ($j['location']): ?>
-                    <i class="fas fa-map-marker-alt" style="color:var(--maroon);font-size:10px"></i>
-                    <?= htmlspecialchars($j['location']) ?>
+                    <i class="fas fa-map-marker-alt" style="color:var(--maroon);font-size:10px"></i> <?= htmlspecialchars($j['location']) ?>
                     <?php else: ?>—<?php endif; ?>
                 </td>
                 <td style="font-size:12px;color:var(--text-muted)"><?= htmlspecialchars($j['experience'] ?: '—') ?></td>
-                <td>
-                    <span class="badge <?= $j['status'] === 'active' ? 'badge-green' : 'badge-gray' ?>">
-                        <?= ucfirst($j['status']) ?>
-                    </span>
-                </td>
+                <td><span class="badge <?= $j['status'] === 'active' ? 'badge-green' : 'badge-gray' ?>"><?= ucfirst($j['status']) ?></span></td>
                 <td style="text-align:center">
-                    <?php if ($j['featured']): ?>
-                    <i class="fas fa-star" style="color:var(--gold)"></i>
-                    <?php else: ?>
-                    <i class="fas fa-star" style="color:var(--beige-dark)"></i>
-                    <?php endif; ?>
+                    <i class="fas fa-fire" style="color:<?= $j['featured'] ? 'var(--danger)' : 'var(--beige-dark)' ?>"></i>
                 </td>
                 <td style="font-size:12px;color:var(--text-muted)"><?= date('d M Y', strtotime($j['created_at'])) ?></td>
                 <td>
                     <div style="display:flex;gap:6px">
-                        <a href="?edit=<?= $j['id'] ?>#jobFormWrap"
-                           class="btn btn-sm btn-icon btn-outline" title="Edit"
-                           onclick="toggleForm(true)"><i class="fas fa-edit"></i></a>
+                        <a href="<?= SITE_URL ?>/job/<?= $j['id'] ?>" target="_blank"
+                           class="btn btn-sm btn-icon btn-gray" title="Preview"><i class="fas fa-eye"></i></a>
+                        <a href="?edit=<?= $j['id'] ?>#jobFormWrap" onclick="toggleForm(true)"
+                           class="btn btn-sm btn-icon btn-outline" title="Edit"><i class="fas fa-edit"></i></a>
                         <form method="POST" style="display:inline" onsubmit="return confirm('Delete this job posting?')">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="id" value="<?= $j['id'] ?>">
@@ -276,7 +276,37 @@ require_once __DIR__ . '/layout-header.php';
     </div>
 </div>
 
+<!-- Quill JS -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 <script>
+const toolbarOptions = [
+    ['bold','italic','underline'],
+    [{'list':'ordered'},{'list':'bullet'}],
+    [{'header':[2,3,false]}],
+    ['link','clean']
+];
+
+const descEditor = new Quill('#descriptionEditor', {
+    theme: 'snow', modules: { toolbar: toolbarOptions }
+});
+const reqEditor = new Quill('#requirementsEditor', {
+    theme: 'snow', modules: { toolbar: toolbarOptions }
+});
+
+// Pre-fill on edit
+<?php if ($editJob && $editJob['description']): ?>
+descEditor.root.innerHTML = <?= json_encode($editJob['description']) ?>;
+<?php endif; ?>
+<?php if ($editJob && $editJob['requirements']): ?>
+reqEditor.root.innerHTML = <?= json_encode($editJob['requirements']) ?>;
+<?php endif; ?>
+
+// On submit, copy HTML into hidden fields
+document.getElementById('jobForm').addEventListener('submit', function() {
+    document.getElementById('descriptionHtml').value  = descEditor.root.innerHTML;
+    document.getElementById('requirementsHtml').value = reqEditor.root.innerHTML;
+});
+
 function toggleForm(show) {
     const wrap = document.getElementById('jobFormWrap');
     const btn  = document.getElementById('addJobBtn');
@@ -291,5 +321,13 @@ function toggleForm(show) {
 document.addEventListener('DOMContentLoaded', () => toggleForm(true));
 <?php endif; ?>
 </script>
+
+<style>
+/* Quill editor admin overrides */
+.ql-toolbar { border-radius: 8px 8px 0 0 !important; border-color: var(--beige-dark) !important; }
+.ql-container { border-radius: 0 0 8px 8px !important; border-color: var(--beige-dark) !important; font-family: 'DM Sans', sans-serif; font-size: 13.5px; }
+.ql-editor { min-height: 140px; }
+.ql-editor:focus { outline: none; }
+</style>
 
 <?php require_once __DIR__ . '/layout-footer.php'; ?>

@@ -139,7 +139,11 @@ include __DIR__ . '/includes/header.php';
                         <?php endif; ?>
                     </div>
                 </div>
+                <?php if (isset($job['id'])): ?>
+                <a href="<?= SITE_URL ?>/job/<?= (int)$job['id'] ?>" style="white-space:nowrap;background:var(--maroon);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:background .2s" onmouseover="this.style.background='var(--maroon-dark)'" onmouseout="this.style.background='var(--maroon)'">View & Apply</a>
+                <?php else: ?>
                 <a href="#apply" onclick="document.querySelector('[name=position]').value=<?= json_encode($job['title']) ?>" style="white-space:nowrap;background:var(--maroon);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:background .2s" onmouseover="this.style.background='var(--maroon-dark)'" onmouseout="this.style.background='var(--maroon)'">Apply Now</a>
+                <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>
