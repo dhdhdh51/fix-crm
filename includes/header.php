@@ -52,6 +52,7 @@ $currentPage  = $currentPage ?? '';
             <a href="<?= SITE_URL ?>/about.php" class="<?= $currentPage === 'about' ? 'active' : '' ?>">About</a>
             <a href="<?= SITE_URL ?>/blog.php" class="<?= $currentPage === 'blog' ? 'active' : '' ?>">Blog</a>
             <a href="<?= SITE_URL ?>/contact.php" class="<?= $currentPage === 'contact' ? 'active' : '' ?>">Contact</a>
+            <a href="<?= SITE_URL ?>/careers.php" class="<?= $currentPage === 'careers' ? 'active' : '' ?>">Careers</a>
         </nav>
         
         <div class="header-cta">

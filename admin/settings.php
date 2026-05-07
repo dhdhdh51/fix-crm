@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!empty($_FILES['logo']['name'])) {
                 $uploaded = uploadImage($_FILES['logo'], 'settings');
                 if ($uploaded['success']) {
-                    $fields['logo'] = $uploaded['path'];
+                    $fields['site_logo'] = $uploaded['path'];
                 } else {
                     $errors[] = 'Logo: ' . $uploaded['message'];
                 }
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!empty($_FILES['favicon']['name'])) {
                 $uploaded = uploadImage($_FILES['favicon'], 'settings');
                 if ($uploaded['success']) {
-                    $fields['favicon'] = $uploaded['path'];
+                    $fields['site_favicon'] = $uploaded['path'];
                 } else {
                     $errors[] = 'Favicon: ' . $uploaded['message'];
                 }

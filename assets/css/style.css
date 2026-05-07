@@ -1058,7 +1058,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
     .header-inner { padding: 0 20px; }
     .hamburger { display: flex; }
     .main-nav, .header-cta { display: none; }
-    .main-nav.open { display: flex; flex-direction: column; position: fixed; top: 80px; left: 0; right: 0; background: var(--beige); padding: 16px; box-shadow: var(--shadow-md); gap: 4px; z-index: 999; }
+    .main-nav.open { display: flex; flex-direction: column; position: fixed; top: 80px; left: 0; right: 0; background: var(--beige); padding: 16px; box-shadow: var(--shadow-md); gap: 4px; z-index: 999; max-height: calc(100vh - 80px); overflow-y: auto; }
     .properties-grid { grid-template-columns: 1fr; }
     .blog-grid { grid-template-columns: 1fr; }
     .team-grid { grid-template-columns: repeat(2, 1fr); }
