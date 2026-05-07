@@ -13,6 +13,12 @@ $siteName      = getSetting('site_name', 'LuxeEstate Realty');
 $pageMetaTitle = "Careers | $siteName";
 $pageMetaDesc  = "Join the $siteName team. Explore exciting career opportunities in real estate sales, marketing, and operations.";
 
+// Load jobs from DB (table may not exist on first visit before admin creates it)
+$dbJobs = [];
+try {
+    $dbJobs = db()->query("SELECT * FROM job_postings WHERE status='active' ORDER BY sort_order ASC, created_at DESC")->fetchAll();
+} catch (PDOException $e) { /* table doesn't exist yet — fall back to defaults */ }
+
 $success = '';
 $errors  = [];
 
@@ -97,28 +103,43 @@ include __DIR__ . '/includes/header.php';
         </div>
         <div style="display:flex;flex-direction:column;gap:16px;max-width:860px;margin:0 auto">
             <?php
-            $jobs = [
-                ['Senior Property Consultant', 'Sales', 'Bangalore', '3+ years', 'Drive premium property sales, build client relationships, and hit ambitious targets in a high-energy environment.'],
-                ['Real Estate Agent', 'Sales', 'Bangalore / Hyderabad', '1+ years', 'Help clients buy, sell, and invest in residential and commercial properties across the city.'],
-                ['Digital Marketing Executive', 'Marketing', 'Bangalore (Hybrid)', '2+ years', 'Manage paid campaigns, social media, SEO, and content strategy to generate quality leads.'],
-                ['Customer Relations Manager', 'Operations', 'Bangalore', '3+ years', 'Ensure an exceptional end-to-end experience for every client from first enquiry to possession.'],
-                ['Property Research Analyst', 'Research', 'Bangalore', '2+ years', 'Analyse market trends, pricing, and investment opportunities to guide clients and internal teams.'],
-                ['Admin & Back-Office Executive', 'Administration', 'Bangalore', 'Fresher / 1+ year', 'Support day-to-day operations, documentation, coordination, and CRM management.'],
+            // Use DB jobs if available, otherwise show defaults
+            $displayJobs = !empty($dbJobs) ? $dbJobs : [
+                ['title'=>'Senior Property Consultant','department'=>'Sales','location'=>'Bangalore','experience'=>'3+ years','description'=>'Drive premium property sales, build client relationships, and hit ambitious targets in a high-energy environment.','featured'=>0],
+                ['title'=>'Real Estate Agent','department'=>'Sales','location'=>'Bangalore / Hyderabad','experience'=>'1+ years','description'=>'Help clients buy, sell, and invest in residential and commercial properties across the city.','featured'=>0],
+                ['title'=>'Digital Marketing Executive','department'=>'Marketing','location'=>'Bangalore (Hybrid)','experience'=>'2+ years','description'=>'Manage paid campaigns, social media, SEO, and content strategy to generate quality leads.','featured'=>0],
+                ['title'=>'Customer Relations Manager','department'=>'Operations','location'=>'Bangalore','experience'=>'3+ years','description'=>'Ensure an exceptional end-to-end experience for every client from first enquiry to possession.','featured'=>0],
+                ['title'=>'Property Research Analyst','department'=>'Research','location'=>'Bangalore','experience'=>'2+ years','description'=>'Analyse market trends, pricing, and investment opportunities to guide clients and internal teams.','featured'=>0],
+                ['title'=>'Admin & Back-Office Executive','department'=>'Administration','location'=>'Bangalore','experience'=>'Fresher / 1+ year','description'=>'Support day-to-day operations, documentation, coordination, and CRM management.','featured'=>0],
             ];
-            foreach ($jobs as [$title, $dept, $location, $exp, $desc]): ?>
-            <div style="background:#fff;border:1px solid var(--border-light);border-radius:12px;padding:24px 28px;display:flex;gap:20px;align-items:flex-start;transition:box-shadow .2s" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='none'">
+            foreach ($displayJobs as $job): ?>
+            <div style="background:#fff;border:1px solid var(--border-light);border-radius:12px;padding:24px 28px;display:flex;gap:20px;align-items:flex-start;transition:box-shadow .2s<?= !empty($job['featured']) ? ';border-left:4px solid var(--gold)' : '' ?>" onmouseover="this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.boxShadow='none'">
                 <div style="flex:1">
                     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
-                        <h3 style="font-size:1.05rem;font-weight:700;color:var(--maroon);margin:0"><?= $title ?></h3>
-                        <span style="background:var(--gold-light,#fff8e1);color:var(--maroon);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid var(--gold)"><?= $dept ?></span>
+                        <h3 style="font-size:1.05rem;font-weight:700;color:var(--maroon);margin:0"><?= htmlspecialchars($job['title']) ?></h3>
+                        <?php if ($job['department']): ?>
+                        <span style="background:#fff8e1;color:var(--maroon);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid var(--gold)"><?= htmlspecialchars($job['department']) ?></span>
+                        <?php endif; ?>
+                        <?php if (!empty($job['featured'])): ?>
+                        <span style="background:#fef2f2;color:var(--maroon);font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid var(--maroon)"><i class="fas fa-fire"></i> Urgent Hiring</span>
+                        <?php endif; ?>
                     </div>
-                    <p style="font-size:13px;color:var(--text-muted);margin:0 0 12px;line-height:1.6"><?= $desc ?></p>
-                    <div style="display:flex;gap:16px;font-size:12px;color:var(--text-muted)">
-                        <span><i class="fas fa-map-marker-alt" style="color:var(--maroon);margin-right:5px"></i><?= $location ?></span>
-                        <span><i class="fas fa-briefcase" style="color:var(--gold);margin-right:5px"></i><?= $exp ?></span>
+                    <?php if ($job['description']): ?>
+                    <p style="font-size:13px;color:var(--text-muted);margin:0 0 12px;line-height:1.6"><?= nl2br(htmlspecialchars($job['description'])) ?></p>
+                    <?php endif; ?>
+                    <?php if (!empty($job['requirements'])): ?>
+                    <p style="font-size:12px;color:var(--text-muted);margin:0 0 12px;line-height:1.6"><strong>Requirements:</strong> <?= nl2br(htmlspecialchars($job['requirements'])) ?></p>
+                    <?php endif; ?>
+                    <div style="display:flex;gap:16px;font-size:12px;color:var(--text-muted);flex-wrap:wrap">
+                        <?php if ($job['location']): ?>
+                        <span><i class="fas fa-map-marker-alt" style="color:var(--maroon);margin-right:5px"></i><?= htmlspecialchars($job['location']) ?></span>
+                        <?php endif; ?>
+                        <?php if ($job['experience']): ?>
+                        <span><i class="fas fa-briefcase" style="color:var(--gold);margin-right:5px"></i><?= htmlspecialchars($job['experience']) ?></span>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <a href="#apply" style="white-space:nowrap;background:var(--maroon);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:background .2s" onmouseover="this.style.background='var(--maroon-dark)'" onmouseout="this.style.background='var(--maroon)'">Apply Now</a>
+                <a href="#apply" onclick="document.querySelector('[name=position]').value=<?= json_encode($job['title']) ?>" style="white-space:nowrap;background:var(--maroon);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;transition:background .2s" onmouseover="this.style.background='var(--maroon-dark)'" onmouseout="this.style.background='var(--maroon)'">Apply Now</a>
             </div>
             <?php endforeach; ?>
         </div>
@@ -176,12 +197,12 @@ include __DIR__ . '/includes/header.php';
                         <label style="font-size:13px;font-weight:600;color:var(--text-dark);display:block;margin-bottom:6px">Position Applying For *</label>
                         <select name="position" required style="width:100%;padding:10px 14px;border:1.5px solid var(--border-light);border-radius:8px;font-size:14px;box-sizing:border-box;outline:none;background:#fff;transition:border .2s" onfocus="this.style.borderColor='var(--maroon)'" onblur="this.style.borderColor='var(--border-light)'">
                             <option value="">Select a position...</option>
-                            <option value="Senior Property Consultant" <?= ($_POST['position'] ?? '') === 'Senior Property Consultant' ? 'selected' : '' ?>>Senior Property Consultant</option>
-                            <option value="Real Estate Agent" <?= ($_POST['position'] ?? '') === 'Real Estate Agent' ? 'selected' : '' ?>>Real Estate Agent</option>
-                            <option value="Digital Marketing Executive" <?= ($_POST['position'] ?? '') === 'Digital Marketing Executive' ? 'selected' : '' ?>>Digital Marketing Executive</option>
-                            <option value="Customer Relations Manager" <?= ($_POST['position'] ?? '') === 'Customer Relations Manager' ? 'selected' : '' ?>>Customer Relations Manager</option>
-                            <option value="Property Research Analyst" <?= ($_POST['position'] ?? '') === 'Property Research Analyst' ? 'selected' : '' ?>>Property Research Analyst</option>
-                            <option value="Admin & Back-Office Executive" <?= ($_POST['position'] ?? '') === 'Admin & Back-Office Executive' ? 'selected' : '' ?>>Admin & Back-Office Executive</option>
+                            <?php foreach ($displayJobs as $job):
+                                $t = $job['title'];
+                                $sel = ($_POST['position'] ?? '') === $t ? 'selected' : '';
+                            ?>
+                            <option value="<?= htmlspecialchars($t) ?>" <?= $sel ?>><?= htmlspecialchars($t) ?></option>
+                            <?php endforeach; ?>
                             <option value="Other" <?= ($_POST['position'] ?? '') === 'Other' ? 'selected' : '' ?>>Other / General Application</option>
                         </select>
                     </div>

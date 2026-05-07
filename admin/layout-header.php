@@ -11,7 +11,7 @@ require_once __DIR__ . '/../functions/functions.php';
 requireAdmin(); // Redirect to login if not authenticated
 
 $siteName  = getSetting('site_name', 'LuxeEstate Realty');
-$logoUrl   = getSetting('logo') ? UPLOAD_URL . getSetting('logo') : '';
+$logoUrl   = getSetting('site_logo') ? SITE_URL . '/' . getSetting('site_logo') : '';
 $adminName = $_SESSION['admin_name'] ?? 'Admin';
 $csrfToken = generateCSRF();
 
@@ -347,6 +347,9 @@ select.form-control { cursor:pointer; }
             </a>
             <a href="<?= ADMIN_URL ?>/testimonials.php" class="nav-item <?= ($activePage??'')==='testimonials' ? 'active' : '' ?>">
                 <i class="fas fa-star nav-icon"></i> Testimonials
+            </a>
+            <a href="<?= ADMIN_URL ?>/jobs.php" class="nav-item <?= ($activePage??'')==='jobs' ? 'active' : '' ?>">
+                <i class="fas fa-briefcase nav-icon"></i> Job Postings
             </a>
 
             <div class="nav-section-label">System</div>
