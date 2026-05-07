@@ -1,0 +1,30 @@
+[06-May-2026 06:41:02 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/hoxgmwvgwv/bharatseo.site/admin/team.php on line 6
+[06-May-2026 06:41:07 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/hoxgmwvgwv/bharatseo.site/admin/team.php on line 6
+[06-May-2026 06:54:14 UTC] PHP Warning:  Undefined array key "image" in /home/hoxgmwvgwv/bharatseo.site/admin/blogs.php on line 218
+[06-May-2026 06:54:14 UTC] PHP Warning:  Undefined array key "image" in /home/hoxgmwvgwv/bharatseo.site/admin/blogs.php on line 218
+[06-May-2026 06:54:14 UTC] PHP Warning:  Undefined array key "image" in /home/hoxgmwvgwv/bharatseo.site/admin/blogs.php on line 218
+[06-May-2026 06:55:14 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/hoxgmwvgwv/bharatseo.site/admin/team.php on line 6
+[06-May-2026 06:55:17 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/hoxgmwvgwv/bharatseo.site/admin/testimonials.php on line 6
+[06-May-2026 07:01:46 UTC] PHP Parse error:  syntax error, unexpected token "??" in /home/hoxgmwvgwv/bharatseo.site/admin/settings.php on line 243
+[06-May-2026 07:01:53 UTC] PHP Parse error:  syntax error, unexpected token "??" in /home/hoxgmwvgwv/bharatseo.site/admin/settings.php on line 243
+[06-May-2026 07:01:54 UTC] PHP Parse error:  syntax error, unexpected token "??" in /home/hoxgmwvgwv/bharatseo.site/admin/settings.php on line 243
+[06-May-2026 07:14:47 UTC] PHP Fatal error:  Uncaught ArgumentCountError: Too few arguments to function exportLeadsCSV(), 0 passed in /home/hoxgmwvgwv/bharatseo.site/admin/leads.php on line 34 and exactly 1 expected in /home/hoxgmwvgwv/bharatseo.site/functions/functions.php:476
+Stack trace:
+#0 /home/hoxgmwvgwv/bharatseo.site/admin/leads.php(34): exportLeadsCSV()
+#1 {main}
+  thrown in /home/hoxgmwvgwv/bharatseo.site/functions/functions.php on line 476
+[06-May-2026 07:26:14 UTC] PHP Warning:  Undefined array key "image" in /home/hoxgmwvgwv/bharatseo.site/admin/blogs.php on line 218
+[06-May-2026 07:26:14 UTC] PHP Warning:  Undefined array key "image" in /home/hoxgmwvgwv/bharatseo.site/admin/blogs.php on line 218
+[06-May-2026 07:26:14 UTC] PHP Warning:  Undefined array key "image" in /home/hoxgmwvgwv/bharatseo.site/admin/blogs.php on line 218
+[06-May-2026 07:26:24 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/hoxgmwvgwv/bharatseo.site/admin/team.php on line 6
+[06-May-2026 07:26:34 UTC] PHP Notice:  session_start(): Ignoring session_start() because a session is already active in /home/hoxgmwvgwv/bharatseo.site/admin/testimonials.php on line 6
+[06-May-2026 07:31:24 UTC] PHP Fatal error:  Uncaught ArgumentCountError: Too few arguments to function exportLeadsCSV(), 0 passed in /home/hoxgmwvgwv/bharatseo.site/admin/leads.php on line 34 and exactly 1 expected in /home/hoxgmwvgwv/bharatseo.site/functions/functions.php:476
+Stack trace:
+#0 /home/hoxgmwvgwv/bharatseo.site/admin/leads.php(34): exportLeadsCSV()
+#1 {main}
+  thrown in /home/hoxgmwvgwv/bharatseo.site/functions/functions.php on line 476
+[06-May-2026 07:31:27 UTC] PHP Fatal error:  Uncaught ArgumentCountError: Too few arguments to function exportLeadsCSV(), 0 passed in /home/hoxgmwvgwv/bharatseo.site/admin/leads.php on line 34 and exactly 1 expected in /home/hoxgmwvgwv/bharatseo.site/functions/functions.php:476
+Stack trace:
+#0 /home/hoxgmwvgwv/bharatseo.site/admin/leads.php(34): exportLeadsCSV()
+#1 {main}
+  thrown in /home/hoxgmwvgwv/bharatseo.site/functions/functions.php on line 476
