@@ -9,6 +9,15 @@ function sanitize(string $input): string {
     return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
 }
 
+function sanitizeMapEmbed(string $input): string {
+    $input = trim($input);
+    if ($input === '') return '';
+    if (!preg_match('#^<iframe\b[^>]*\bsrc\s*=\s*["\']https://(www\.)?google\.com/maps/embed[^"\']*["\'][^>]*>\s*</iframe>$#i', $input)) {
+        return '';
+    }
+    return preg_replace('/\s+on[a-z]+\s*=\s*"[^"]*"|\s+on[a-z]+\s*=\s*\'[^\']*\'/i', '', $input);
+}
+
 function generateSlug(string $text): string {
     $text = strtolower(trim($text));
     $text = preg_replace('/[^a-z0-9\s-]/', '', $text);

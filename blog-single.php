@@ -43,12 +43,16 @@ $relatedPosts = $related->fetchAll();
 
 // If not enough, fill with latest
 if (count($relatedPosts) < 3) {
-    $ids   = array_column($relatedPosts, 'id');
-    $ids[] = $blog['id'];
-    $notIn = implode(',', array_map('intval', $ids));
-    $more  = $db->query("SELECT id, title, slug, featured_image AS image, created_at, category
-        FROM blogs WHERE status='published' AND id NOT IN ($notIn) ORDER BY created_at DESC LIMIT " . (3 - count($relatedPosts)))->fetchAll();
-    $relatedPosts = array_merge($relatedPosts, $more);
+    $ids   = array_map('intval', array_column($relatedPosts, 'id'));
+    $ids[] = (int)$blog['id'];
+    $place = implode(',', array_fill(0, count($ids), '?'));
+    $limit = 3 - count($relatedPosts);
+    $more  = $db->prepare("SELECT id, title, slug, featured_image AS image, created_at, category
+        FROM blogs WHERE status='published' AND id NOT IN ($place) ORDER BY created_at DESC LIMIT ?");
+    foreach ($ids as $i => $id) $more->bindValue($i + 1, $id, PDO::PARAM_INT);
+    $more->bindValue(count($ids) + 1, $limit, PDO::PARAM_INT);
+    $more->execute();
+    $relatedPosts = array_merge($relatedPosts, $more->fetchAll());
 }
 
 // Prev / Next

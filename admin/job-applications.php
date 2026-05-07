@@ -55,8 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $row->execute([$appId]);
         $resumePath = $row->fetchColumn();
         if ($resumePath) {
-            $fullPath = SITE_ROOT . '/' . ltrim($resumePath, '/');
-            if (file_exists($fullPath)) unlink($fullPath);
+            $uploadsRoot = realpath(SITE_ROOT . '/uploads');
+            $fullPath    = realpath(SITE_ROOT . '/' . ltrim($resumePath, '/'));
+            if ($uploadsRoot && $fullPath && str_starts_with($fullPath, $uploadsRoot . DIRECTORY_SEPARATOR) && is_file($fullPath)) {
+                @unlink($fullPath);
+            }
         }
         $db->prepare("DELETE FROM job_applications WHERE id=?")->execute([$appId]);
         $_SESSION['flash'] = ['type'=>'success','msg'=>'Application deleted.'];
@@ -85,8 +88,12 @@ $cStmt = $db->prepare("SELECT COUNT(*) FROM job_applications a $whereSQL");
 $cStmt->execute($params); $total = (int)$cStmt->fetchColumn();
 $pages = ceil($total / $perPage);
 
-$qStmt = $db->prepare("SELECT a.* FROM job_applications a $whereSQL ORDER BY a.applied_at DESC LIMIT $perPage OFFSET $offset");
-$qStmt->execute($params);
+$qStmt = $db->prepare("SELECT a.* FROM job_applications a $whereSQL ORDER BY a.applied_at DESC LIMIT ? OFFSET ?");
+$idx = 1;
+foreach ($params as $p) $qStmt->bindValue($idx++, $p);
+$qStmt->bindValue($idx++, (int)$perPage, PDO::PARAM_INT);
+$qStmt->bindValue($idx, (int)$offset, PDO::PARAM_INT);
+$qStmt->execute();
 $applications = $qStmt->fetchAll();
 
 // All jobs for filter dropdown

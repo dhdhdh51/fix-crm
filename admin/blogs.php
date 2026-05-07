@@ -97,7 +97,11 @@ $perPage = ADMIN_PER_PAGE;
 $offset  = ($page - 1) * $perPage;
 $total   = (int)$db->query("SELECT COUNT(*) FROM blogs")->fetchColumn();
 $pages   = (int)ceil($total / $perPage);
-$blogs   = $db->query("SELECT b.*,u.name AS author FROM blogs b LEFT JOIN users u ON b.author_id=u.id ORDER BY b.created_at DESC LIMIT $perPage OFFSET $offset")->fetchAll();
+$bStmt   = $db->prepare("SELECT b.*,u.name AS author FROM blogs b LEFT JOIN users u ON b.author_id=u.id ORDER BY b.created_at DESC LIMIT ? OFFSET ?");
+$bStmt->bindValue(1, (int)$perPage, PDO::PARAM_INT);
+$bStmt->bindValue(2, (int)$offset, PDO::PARAM_INT);
+$bStmt->execute();
+$blogs   = $bStmt->fetchAll();
 
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);

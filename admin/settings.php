@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'contact_email2'  => sanitize($_POST['email_alt'] ?? ''),
                 'contact_address' => sanitize($_POST['address'] ?? ''),
                 'whatsapp_number' => sanitize($_POST['whatsapp'] ?? ''),
-                'map_embed'       => $_POST['map_embed'] ?? '',
+                'map_embed'       => sanitizeMapEmbed($_POST['map_embed'] ?? ''),
                 'office_hours'    => sanitize($_POST['office_hours'] ?? ''),
             ];
         }
