@@ -19,6 +19,8 @@ $csrfToken = generateCSRF();
 $db = db();
 $newLeadsCount = (int)$db->query("SELECT COUNT(*) FROM leads WHERE status='new'")->fetchColumn();
 $totalProps    = (int)$db->query("SELECT COUNT(*) FROM properties WHERE status='active'")->fetchColumn();
+$newAppsCount  = 0;
+try { $newAppsCount = (int)$db->query("SELECT COUNT(*) FROM job_applications WHERE status='new'")->fetchColumn(); } catch(PDOException $e){}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -350,6 +352,10 @@ select.form-control { cursor:pointer; }
             </a>
             <a href="<?= ADMIN_URL ?>/jobs.php" class="nav-item <?= ($activePage??'')==='jobs' ? 'active' : '' ?>">
                 <i class="fas fa-briefcase nav-icon"></i> Job Postings
+            </a>
+            <a href="<?= ADMIN_URL ?>/job-applications.php" class="nav-item <?= ($activePage??'')==='job-applications' ? 'active' : '' ?>">
+                <i class="fas fa-file-alt nav-icon"></i> Applications
+                <?php if ($newAppsCount): ?><span class="nav-badge"><?= $newAppsCount ?></span><?php endif; ?>
             </a>
 
             <div class="nav-section-label">System</div>
