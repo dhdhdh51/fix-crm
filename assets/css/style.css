@@ -1092,9 +1092,8 @@ textarea.form-control { resize: vertical; min-height: 100px; }
     .cta-section .grid-2 { grid-template-columns: 1fr; }
     .bottom-cta-bar { display: flex; gap: 10px; }
     .sticky-buttons { right: 16px; bottom: 90px; }
-    body { padding-bottom: 90px; }
     .back-to-top { bottom: 100px !important; }
-    .footer-bottom { flex-direction: column; text-align: center; gap: 12px; padding: 1.2rem 0; }
+    .footer-bottom { flex-direction: column; text-align: center; gap: 12px; padding: 1.2rem 0 100px; }
     .footer-bottom > div { justify-content: center; padding-right: 0; }
     .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
     .stat-cards { grid-template-columns: repeat(2, 1fr); }
