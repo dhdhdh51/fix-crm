@@ -3,6 +3,25 @@ if (!defined('SITE_ROOT')) {
     require_once dirname(__DIR__) . '/config/config.php';
     require_once dirname(__DIR__) . '/functions/functions.php';
 }
+
+// ── Total visitor counter (per-session unique) ──────────
+$totalVisitors = 0;
+try {
+    $pdo = db();
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `visitor_stats` (
+        `id` tinyint(1) NOT NULL DEFAULT 1,
+        `total_visits` bigint(20) UNSIGNED NOT NULL DEFAULT 0,
+        `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $pdo->exec("INSERT IGNORE INTO visitor_stats (id, total_visits) VALUES (1, 0)");
+    if (empty($_SESSION['visit_counted'])) {
+        $pdo->exec("UPDATE visitor_stats SET total_visits = total_visits + 1 WHERE id = 1");
+        $_SESSION['visit_counted'] = 1;
+    }
+    $totalVisitors = (int)$pdo->query("SELECT total_visits FROM visitor_stats WHERE id = 1")->fetchColumn();
+} catch (PDOException $e) { /* silent */ }
+
 $siteName     = getSetting('site_name', 'LuxeEstate Realty');
 $siteTagline  = getSetting('site_tagline', 'Your Dream Home Awaits');
 $siteLogo     = getSetting('site_logo');

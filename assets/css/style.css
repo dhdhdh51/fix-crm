@@ -1075,6 +1075,8 @@ textarea.form-control { resize: vertical; min-height: 100px; }
     .cta-section .grid-2 { grid-template-columns: 1fr; }
     .bottom-cta-bar { display: flex; gap: 10px; }
     .sticky-buttons { right: 16px; bottom: 80px; }
+    body { padding-bottom: 76px; }
+    .back-to-top { bottom: 90px !important; }
     .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
     .stat-cards { grid-template-columns: repeat(2, 1fr); }
     .admin-topbar { padding: 0 16px; }

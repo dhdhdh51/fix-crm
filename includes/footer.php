@@ -128,6 +128,12 @@ $footerAbout = getSetting('footer_about');
                     <span id="liveVisitorCount">…</span>
                     <span class="live-label">online now</span>
                 </div>
+                <!-- Total visitor counter -->
+                <div class="total-visitor-badge" title="Total visitors all-time">
+                    <i class="fas fa-eye"></i>
+                    <span class="total-visitor-count"><?= number_format($totalVisitors ?? 0) ?></span>
+                    <span class="live-label">total visits</span>
+                </div>
                 <a href="<?= SITE_URL ?>/privacy.php">Privacy Policy</a>
                 <a href="<?= SITE_URL ?>/terms.php">Terms of Use</a>
                 <a href="<?= SITE_URL ?>/sitemap.xml" style="color:rgba(255,255,255,0.4)">Sitemap</a>
@@ -162,6 +168,14 @@ $footerAbout = getSetting('footer_about');
     transition: transform .3s, opacity .3s;
 }
 .live-label { color: rgba(255,255,255,.55); }
+.total-visitor-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(128,0,0,.25); border: 1px solid rgba(229,200,120,.25);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 0.78rem; color: rgba(255,255,255,.8);
+}
+.total-visitor-badge i { color: #E5C878; font-size: 0.78rem; }
+.total-visitor-count { font-weight: 700; color: #E5C878; }
 </style>
 
 <script>
