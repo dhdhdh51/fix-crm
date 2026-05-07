@@ -1228,10 +1228,15 @@ a.btn-white-outline:hover, button.btn-white-outline:hover { background: var(--wh
 }
 
 /* ===================== ABOUT PAGE ===================== */
+.about-story { background: #fff; }
 .about-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
 }
-.about-image { position: relative; border-radius: var(--radius-lg); overflow: visible; }
+.about-image {
+    position: relative; border-radius: var(--radius-lg); overflow: visible;
+    min-width: 0; padding-bottom: 36px; padding-right: 36px;
+}
+.about-content { min-width: 0; }
 .about-img-placeholder {
     background: linear-gradient(135deg, var(--maroon), var(--maroon-light));
     border-radius: var(--radius-lg); height: 480px;
@@ -1243,7 +1248,7 @@ a.btn-white-outline:hover, button.btn-white-outline:hover { background: var(--wh
     display: block;
 }
 .about-exp-badge {
-    position: absolute; bottom: -20px; right: -20px;
+    position: absolute; bottom: 0; right: 0;
     background: var(--gold-gradient); border-radius: var(--radius-md);
     padding: 20px 24px; text-align: center; box-shadow: var(--shadow-gold);
     z-index: 2;
