@@ -312,7 +312,7 @@ include __DIR__ . '/includes/header.php';
             </div>
             <div class="properties-grid">
                 <?php foreach ($related as $p): ?>
-                    <?php include __DIR__ . '/includes/property-card.php'; ?>
+                    <?php $property = $p; include __DIR__ . '/includes/property-card.php'; ?>
                 <?php endforeach; ?>
             </div>
         </div>
