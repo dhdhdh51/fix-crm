@@ -150,59 +150,57 @@ function uploadImage(array $file, string $folder = 'properties'): array {
         return ['success' => false, 'message' => 'File too large. Max 5MB allowed.'];
     }
     $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime = $finfo->file($file['tmp_name']);
+    $mime  = $finfo->file($file['tmp_name']);
     if (!in_array($mime, ALLOWED_IMAGE_TYPES)) {
         return ['success' => false, 'message' => 'Only JPEG, PNG, WebP allowed.'];
     }
-    
-    $ext = match($mime) {
-        'image/jpeg' => 'jpg',
-        'image/png' => 'png',
-        'image/webp' => 'webp',
-        default => 'jpg'
+
+    $hasGD    = function_exists('imagecreatefromjpeg') && function_exists('imagewebp');
+    $ext      = $hasGD ? 'webp' : match($mime) {
+        'image/jpeg' => 'jpg', 'image/png' => 'png', default => 'webp'
     };
-    
+
     $uploadDir = UPLOAD_DIR . $folder . '/';
     if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-    
-    $filename = uniqid('img_', true) . '.' . $ext;
-    $path = $uploadDir . $filename;
-    
-    // Compress and resize
-    if (function_exists('imagecreatefromjpeg')) {
-        compressImage($file['tmp_name'], $path, $mime);
+
+    $base     = uniqid('img_', true);
+    $filename = $base . '.' . $ext;
+    $fullPath = $uploadDir . $filename;
+
+    if ($hasGD) {
+        compressImage($file['tmp_name'], $fullPath, $mime, 1200, 900, 82);
+        // thumbnail for card listings
+        compressImage($file['tmp_name'], $uploadDir . 'thumb_' . $filename, $mime, 600, 450, 75);
     } else {
-        move_uploaded_file($file['tmp_name'], $path);
+        move_uploaded_file($file['tmp_name'], $fullPath);
     }
-    
+
     return ['success' => true, 'path' => 'uploads/' . $folder . '/' . $filename, 'filename' => $filename];
 }
 
-function compressImage(string $source, string $dest, string $mime): bool {
-    $quality = 85;
+function compressImage(string $source, string $dest, string $mime, int $maxW = 1200, int $maxH = 900, int $quality = 82): bool {
     $image = match($mime) {
         'image/jpeg' => imagecreatefromjpeg($source),
-        'image/png' => imagecreatefrompng($source),
+        'image/png'  => imagecreatefrompng($source),
         'image/webp' => imagecreatefromwebp($source),
-        default => null
+        default      => null
     };
-    if (!$image) { return move_uploaded_file($source, $dest); }
-    
+    if (!$image) return copy($source, $dest);
+
     $w = imagesx($image); $h = imagesy($image);
-    $maxW = 1200; $maxH = 900;
     if ($w > $maxW || $h > $maxH) {
-        $ratio = min($maxW / $w, $maxH / $h);
-        $nW = intval($w * $ratio); $nH = intval($h * $ratio);
-        $resized = imagecreatetruecolor($nW, $nH);
-        imagecopyresampled($resized, $image, 0, 0, 0, 0, $nW, $nH, $w, $h);
-        imagedestroy($image); $image = $resized;
+        $ratio  = min($maxW / $w, $maxH / $h);
+        $nW = (int)($w * $ratio); $nH = (int)($h * $ratio);
+        $canvas = imagecreatetruecolor($nW, $nH);
+        imagealphablending($canvas, false);
+        imagesavealpha($canvas, true);
+        imagecopyresampled($canvas, $image, 0, 0, 0, 0, $nW, $nH, $w, $h);
+        imagedestroy($image);
+        $image = $canvas;
     }
-    
-    $result = match($mime) {
-        'image/png' => imagepng($image, $dest, 8),
-        'image/webp' => imagewebp($image, $dest, $quality),
-        default => imagejpeg($image, $dest, $quality)
-    };
+
+    // Always output WebP — 30–50 % smaller than JPG/PNG
+    $result = imagewebp($image, $dest, $quality);
     imagedestroy($image);
     return $result;
 }

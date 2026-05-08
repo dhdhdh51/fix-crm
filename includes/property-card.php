@@ -6,8 +6,12 @@
  */
 $imgUrl = SITE_URL . '/assets/images/property-placeholder.jpg';
 if (!empty($property['primary_image'])) {
-    $imgPath = SITE_ROOT . '/' . $property['primary_image'];
-    if (file_exists($imgPath)) {
+    $dir      = dirname($property['primary_image']);
+    $base     = basename($property['primary_image']);
+    $thumbRel = $dir . '/thumb_' . $base;
+    if (file_exists(SITE_ROOT . '/' . $thumbRel)) {
+        $imgUrl = SITE_URL . '/' . $thumbRel;
+    } elseif (file_exists(SITE_ROOT . '/' . $property['primary_image'])) {
         $imgUrl = SITE_URL . '/' . $property['primary_image'];
     }
 }

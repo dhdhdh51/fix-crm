@@ -356,6 +356,7 @@ require_once __DIR__ . '/layout-header.php';
                             <i class="fas fa-cloud-upload-alt" style="font-size:28px;color:var(--gold);margin-bottom:8px;display:block"></i>
                             <p style="font-size:13px;color:var(--text-muted)">Click or drag images here<br>
                                <span style="font-size:11px">JPG, PNG, WebP — Max 5MB each — Multiple allowed</span></p>
+                            <span id="fileCountBadge" style="display:none;background:var(--maroon);color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:20px;margin-top:6px;display:inline-block"></span>
                         </div>
                         <input type="file" name="images[]" id="imagesInput" multiple accept="image/jpeg,image/png,image/webp" style="display:none">
                         <div id="imagePreviewGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:10px"></div>
@@ -422,6 +423,12 @@ require_once __DIR__ . '/layout-header.php';
 </form>
 
 <script>
+// Show progress on submit
+document.getElementById('propertyForm')?.addEventListener('submit', function() {
+    const btn = this.querySelector('button[type=submit]');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
+});
+
 // Auto-slug from title
 document.getElementById('titleField')?.addEventListener('input', function() {
     const slugField = document.getElementById('slugField');
@@ -434,11 +441,14 @@ document.getElementById('slugField')?.addEventListener('input', function() {
     this.dataset.manual = this.value ? '1' : '';
 });
 
-// Image preview
+// Image preview + file count badge
 document.getElementById('imagesInput')?.addEventListener('change', function() {
-    const grid = document.getElementById('imagePreviewGrid');
+    const grid  = document.getElementById('imagePreviewGrid');
+    const badge = document.getElementById('fileCountBadge');
     grid.innerHTML = '';
-    Array.from(this.files).forEach(file => {
+    const files = Array.from(this.files);
+    if (badge) { badge.textContent = files.length + ' image' + (files.length !== 1 ? 's' : '') + ' selected'; badge.style.display = 'inline-block'; }
+    files.forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
             const d = document.createElement('div');
